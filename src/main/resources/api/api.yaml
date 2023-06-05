@@ -1,0 +1,490 @@
+openapi: 3.0.1
+info:
+  title: Pet shelter
+  description: This is a sample shelter application
+  version: 1.0.0
+servers:
+  - url: /
+tags:
+  - name: Pets
+    description: Everything about Pets
+  - name: Users
+    description: Operations about users
+paths:
+  /login:
+    get:
+      tags:
+        - Login
+      summary: Get main login page
+      description: Initial login
+      operationId: user login
+      parameters:
+        - name: email
+          in: query
+          description: user email
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: user password
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        404:
+          description: user was not found
+          content: { }
+  /register:
+    post:
+      tags:
+        - Users
+      summary: Create user
+      description: User registration
+      operationId: createUser
+      requestBody:
+        description: User object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+        403:
+          description: User already exists
+          content: { }
+        405:
+          description: Validation exception
+          content: { }
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      description: All users list
+      operationId: getAllUsers
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '404':
+          description: users not found
+          content: { }
+  /users/findByEmail/{email}:
+    get:
+      tags:
+        - Users
+      summary: Get user by email(login)
+      description: Information about user by email(login)
+      operationId: getUserByEmail
+      parameters:
+        - name: email
+          in: path
+          description: User email to find
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          description: User not found
+          content: { }
+  /users/{userId}:
+    put:
+      tags:
+        - Users
+      summary: Updated user
+      description: Update user changes
+      operationId: updateUser
+      parameters:
+        - name: userId
+          in: path
+          description: userId that need to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Updated user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          description: User not found
+          content: { }
+        405:
+          description: Validation exception
+          content: { }
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: Delete user from list
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          description: User  that needs to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          description: User not found
+          content: { }
+  /pets:
+    get:
+      tags:
+        - Pets
+      summary: Get all pets
+      description: All pets list
+      operationId: getAllPets
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+        '404':
+          description: No pets found
+          content: { }
+    post:
+      tags:
+        - Pets
+      summary: Create pet
+      description: Pet registration
+      operationId: createPet
+      requestBody:
+        description: Pet object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+        403:
+          description: Pet already exists
+          content: { }
+        405:
+          description: Validation exception
+          content: { }
+  /pets/{petId}:
+    put:
+      tags:
+        - Pets
+      summary: Updated pet
+      description: Update pet changes
+      operationId: updatePet
+      parameters:
+        - name: petId
+          in: path
+          description: petId that need to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Updated pet object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        404:
+          description: Pet not found
+          content: { }
+        405:
+          description: Validation exception
+          content: { }
+    delete:
+      tags:
+        - Pets
+      summary: Delete pet
+      description: Delete pet from list
+      operationId: deletePet
+      parameters:
+        - name: petId
+          in: path
+          description: Pet that needs to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        404:
+          description: Pet not found
+          content: { }
+  /pets/donate/{petId}:
+    get:
+      tags:
+        - Donate
+      summary: Get all donates for pet
+      description: All donate sum per pet
+      operationId: getAllDonate
+      parameters:
+        - name: petId
+          in: path
+          description: get donation on petId or shelter if 0
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: number
+    post:
+      tags:
+        - Donate
+      summary: Add donate
+      description: Pet donation
+      operationId: addDonate
+      parameters:
+        - name: petId
+          in: path
+          description: get donation on petId or shelter if 0
+          required: true
+          schema:
+            type: integer
+            format:
+              int64
+      requestBody:
+        description: Donate object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Donate'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /pets/findByName/{name}:
+    get:
+      tags:
+        - Pets
+      summary: Get pet by name
+      description: Information about pet by name
+      operationId: getPetByName
+      parameters:
+        - name: name
+          in: path
+          description: Pet name to find
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        404:
+          description: Pet not found
+          content: { }
+  /pets/findByType/{type}:
+    get:
+      tags:
+        - Pets
+      summary: Get pets by type cat or dog
+      description: Information about pets by type
+      operationId: getPetsByType
+      parameters:
+        - name: type
+          in: path
+          description: Pets type
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+        404:
+          description: Pets not found
+          content: { }
+components:
+  schemas:
+    User:
+      required:
+        - email
+        - firstName
+        - lastName
+        - password
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 30
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 30
+        email:
+          type: string
+          minLength: 1
+          maxLength: 40
+        phoneNumber:
+          type: string
+          maxLength: 15
+        password:
+          type: string
+        group:
+          type: string
+          enum:
+            - admin
+            - guest
+      xml:
+        name: User
+    Pet:
+      required:
+        - name
+        - type
+        - gender
+        - kind
+        - age
+        - weight
+        - color
+        - vaccinated
+        - castrated
+        - specialTreatment
+        - story
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        type:
+          type: string
+          enum:
+            - CAT
+            - DOG
+        gender:
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+        kind:
+          type: string
+        age:
+          type: integer
+          maximum: 20
+        weight:
+          type: integer
+          maximum: 100
+        color:
+          type: string
+          maxLength: 20
+        vaccinated:
+          type: boolean
+        castrated:
+          type: boolean
+        specialTreatment:
+          type: boolean
+        story:
+          type: string
+          maxLength: 60
+    Donate:
+      required:
+        - sum
+      type: object
+      properties:
+        sum:
+          type: integer
+          format: int64
+          readOnly: true
+        petId:
+          type: integer
+          format: int64
+          readOnly: true
+        userId:
+          type: integer
+          format: int64
+          readOnly: true
+      xml:
+        name: Donate

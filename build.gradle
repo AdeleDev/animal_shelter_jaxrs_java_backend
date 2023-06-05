@@ -1,0 +1,157 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
+plugins {
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'java'
+    id 'org.openapi.generator' version "${openapiGenVersion}"
+}
+
+group = 'org.demo.defaultpackage.shelterservice'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "$sourceEncoding"
+}
+
+def generateApiAndModel = tasks.register('generateApiAndModel', GenerateTask) {
+    generatorName = "jaxrs-spec"
+    inputSpec = "$rootDir/src/main/resources/api/api.yaml".toString()
+    outputDir = "$buildDir/openapi-generated-src".toString()
+
+    configOptions = [
+            dateLibrary   : "java8",
+            sourceFolder  : "",
+            returnResponse: "true",
+            interfaceOnly : "true"
+    ]
+    systemProperties = [
+            apis  : "",
+            models: ""
+    ]
+    apiPackage = "org.demo.defaultpackage.shelterservice.api"
+    modelPackage = "org.demo.defaultpackage.shelterservice.model"
+    modelNameSuffix = "Dto"
+    generateApiTests = false
+    generateModelTests = false
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs "$buildDir/openapi-generated-src"
+        }
+    }
+    test {
+        java {
+            srcDirs "$buildDir/openapi-generated-src"
+        }
+    }
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integration-test/java')
+        }
+        resources.srcDir file("src/integration-test/resources")
+    }
+}
+
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestImplementation.extendsFrom implementation
+
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+dependencies {
+
+    implementation "com.h2database:h2:${h2database}"
+    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
+    implementation "io.swagger:swagger-annotations:${swaggerVersion}"
+    implementation "org.mapstruct:mapstruct:${mapStructVersion}"
+    implementation "org.hibernate.validator:hibernate-validator:${hibernateVersion}"
+    implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${jacksonVersion}"
+    implementation("javax.xml.ws:jaxws-api:$jaxwsVersion") { transitive = false }
+    implementation group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.5.1'
+    implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.3.1'
+
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapStructVersion}"
+
+    implementation "org.apache.cxf:cxf-spring-boot-starter-jaxrs:${cxfSpringBootVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
+    testImplementation "org.mockito:mockito-inline:$mockitoInlineVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
+
+    integrationTestImplementation "org.springframework.data:spring-data-commons:${dataCommons}"
+    integrationTestImplementation "org.apache.commons:commons-lang3:${lang3commons}"
+    integrationTestImplementation "io.rest-assured:rest-assured:$restAssuredVersion"
+    integrationTestImplementation "io.rest-assured:json-path:$restAssuredVersion"
+    integrationTestImplementation "io.rest-assured:xml-path:$restAssuredVersion"
+
+    developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+bootJar {
+    manifest {
+        attributes(
+                'Created-By': "${System.properties['java.version']} (${System.properties['java.vendor']})",
+                'Build-Tool': "Gradle $gradle.gradleVersion",
+                'Built-By': System.properties['user.name'],
+                'Implementation-Title': rootProject.name,
+                'Implementation-Vendor': 'Vendor',
+                'Implementation-Version': "$project.version"
+        )
+    }
+}
+//
+//openApiGenerate {
+//    generatorName = "jaxrs-spec"
+//    inputSpec = "$rootDir/src/main/resources/api/api.yaml".toString()
+//    outputDir = "$buildDir/openapi-generated-src".toString()
+//
+//    configOptions = [
+//            dateLibrary   : "java8",
+//            sourceFolder  : "",
+//            returnResponse: "true",
+//            interfaceOnly : "true"
+//    ]
+//    systemProperties = [
+//            apis  : "",
+//            models: ""
+//    ]
+//    apiPackage = "org.demo.defaultpackage.shelterservice.api"
+//    modelPackage = "org.demo.defaultpackage.shelterservice.model"
+//    modelNameSuffix = "Dto"
+//    generateApiTests = false
+//    generateModelTests = false
+//}
+
+//compileJava.dependsOn tasks.openApiGenerate
+compileJava.dependsOn generateApiAndModel
+
+task integrationTest(type: Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+
+    useJUnitPlatform()
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
+    outputs.upToDateWhen { false }
+}

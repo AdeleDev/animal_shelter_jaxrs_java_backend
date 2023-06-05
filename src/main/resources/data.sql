@@ -1,0 +1,3 @@
+INSERT INTO GROUPS (ID, TYPE)
+VALUES (1, 'ADMIN'),
+       (2, 'GUEST');
