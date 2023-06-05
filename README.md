@@ -1,7 +1,7 @@
 # Animal Shelter Backend App (JaxRS)
 
 Animal Shelter Application backend based on jaxRs. Working with h2 DB via Hibernate.
-Working in pair with [Frontend React App](https://github.com/AdeleDev/cat_service_frontend). 
+Working in pair with [Frontend React App](https://github.com/AdeleDev/animal_shelter_react_frontend). 
 Backend performs next modules:
 
 * User: can add, update, delete users
